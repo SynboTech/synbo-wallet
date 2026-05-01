@@ -1,0 +1,272 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../../../app/brand/app_brand.dart';
+
+class PasswordUnlockPage extends StatefulWidget {
+  const PasswordUnlockPage({super.key, required this.onUnlocked});
+
+  final VoidCallback onUnlocked;
+
+  @override
+  State<PasswordUnlockPage> createState() => _PasswordUnlockPageState();
+}
+
+class _PasswordUnlockPageState extends State<PasswordUnlockPage> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+  bool _obscureText = true;
+
+  bool get _canUnlock => _controller.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _UnlockBrandPattern(),
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(28, 22, 28, 30),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 52,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 88),
+                        _BrandLockup(colorScheme: colorScheme),
+                        const SizedBox(height: 142),
+                        _PasswordField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          obscureText: _obscureText,
+                          onToggleObscure: () =>
+                              setState(() => _obscureText = !_obscureText),
+                          onSubmitted: _canUnlock ? _unlock : null,
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 58,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _canUnlock
+                                  ? const Color(0xFF111214)
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.38,
+                                    ),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: _canUnlock ? _unlock : null,
+                            child: const Text(
+                              '解锁',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        TextButton(
+                          onPressed: _showRecoveryNotice,
+                          child: const Text(
+                            '忘记密码？',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 120),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _unlock() {
+    FocusScope.of(context).unfocus();
+    widget.onUnlocked();
+  }
+
+  void _showRecoveryNotice() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('请通过助记词或私钥在安全环境中恢复钱包')));
+  }
+}
+
+class _BrandLockup extends StatelessWidget {
+  const _BrandLockup({required this.colorScheme});
+
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 118,
+          height: 118,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 26,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Image.asset(AppBrand.markAsset, fit: BoxFit.contain),
+        ),
+        const SizedBox(height: 22),
+        Text(
+          AppBrand.name,
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PasswordField extends StatelessWidget {
+  const _PasswordField({
+    required this.controller,
+    required this.focusNode,
+    required this.obscureText,
+    required this.onToggleObscure,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool obscureText;
+  final VoidCallback onToggleObscure;
+  final VoidCallback? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: obscureText,
+      textInputAction: TextInputAction.done,
+      onSubmitted: (_) => onSubmitted?.call(),
+      decoration: InputDecoration(
+        hintText: '输入密码',
+        prefixIcon: const Icon(Icons.lock_outline_rounded),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: obscureText ? '显示密码' : '隐藏密码',
+              onPressed: onToggleObscure,
+              icon: Icon(
+                obscureText
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+            ),
+            IconButton(
+              tooltip: '生物识别',
+              onPressed: () => ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('生物识别将在接入设备能力后启用'))),
+              icon: const Icon(Icons.face_retouching_natural_outlined),
+            ),
+          ],
+        ),
+      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+    );
+  }
+}
+
+class _UnlockBrandPattern extends StatelessWidget {
+  const _UnlockBrandPattern();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: SizedBox(
+        height: 170,
+        child: CustomPaint(painter: _UnlockBrandPatternPainter()),
+      ),
+    );
+  }
+}
+
+class _UnlockBrandPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final yellow = Paint()
+      ..color = const Color(0xFFF9BE00).withValues(alpha: 0.18);
+    final dark = Paint()..color = Colors.black.withValues(alpha: 0.04);
+    _drawHex(canvas, Offset(size.width * 0.22, size.height * 0.92), 92, yellow);
+    _drawHex(canvas, Offset(size.width * 0.78, size.height * 0.92), 92, yellow);
+    _drawHex(canvas, Offset(size.width * 0.50, size.height * 1.08), 100, dark);
+  }
+
+  void _drawHex(Canvas canvas, Offset center, double radius, Paint paint) {
+    final path = Path();
+    for (var i = 0; i < 6; i++) {
+      final angle = -1.5708 + i * 1.0472;
+      final point = Offset(
+        center.dx + radius * math.cos(angle),
+        center.dy + radius * math.sin(angle),
+      );
+      if (i == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    canvas.drawPath(path..close(), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
