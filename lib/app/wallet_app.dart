@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../features/security/pages/password_unlock_page.dart';
+import '../shared/widgets/animated_brand_mark.dart';
 import '../features/wallet/providers/wallet_state_scope.dart';
 import 'brand/app_brand.dart';
 import 'navigation/app_shell.dart';
@@ -44,6 +45,26 @@ class _BootLoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AnimatedBrandMark(),
+            const SizedBox(height: 22),
+            Text(
+              AppBrand.name,
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

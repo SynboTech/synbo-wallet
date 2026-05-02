@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../app/brand/app_brand.dart';
+import '../../../shared/widgets/animated_brand_mark.dart';
 import '../../wallet/providers/wallet_state_scope.dart';
 
 class PasswordUnlockPage extends StatefulWidget {
@@ -188,23 +189,7 @@ class _BrandLockup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 118,
-          height: 118,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 26,
-                offset: const Offset(0, 14),
-              ),
-            ],
-          ),
-          child: Image.asset(AppBrand.markAsset, fit: BoxFit.contain),
-        ),
+        const AnimatedBrandMark(),
         const SizedBox(height: 22),
         Text(
           AppBrand.name,
