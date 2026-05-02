@@ -6,6 +6,7 @@ import '../../../shared/widgets/info_row.dart';
 import '../../wallet/models/wallet_models.dart';
 import '../../wallet/pages/wallet_setup_flow_page.dart';
 import '../../wallet/providers/wallet_state_scope.dart';
+import '../../security/widgets/sensitive_action_auth_sheet.dart';
 import '../widgets/settings_group.dart';
 import 'mnemonic_backup_page.dart';
 
@@ -79,24 +80,20 @@ class WalletManagementPage extends StatelessWidget {
                 SettingsItem(
                   icon: Icons.security_outlined,
                   title: '备份助记词',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const MnemonicBackupPage(),
-                    ),
-                  ),
+                  onTap: () => _openMnemonicBackup(context),
                 ),
                 const Divider(height: 1),
                 SettingsItem(
                   icon: Icons.vpn_key_outlined,
                   title: '导出私钥',
-                  onTap: () => _showRiskDialog(context, '导出私钥'),
+                  onTap: () => _guardSensitiveAction(context, '导出私钥'),
                 ),
                 const Divider(height: 1),
                 SettingsItem(
                   icon: Icons.delete_outline,
                   title: '删除钱包',
                   destructive: true,
-                  onTap: () => _showRiskDialog(context, '删除钱包'),
+                  onTap: () => _guardSensitiveAction(context, '删除钱包'),
                 ),
               ],
             ),
@@ -168,6 +165,32 @@ class WalletManagementPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openMnemonicBackup(BuildContext context) async {
+    final approved = await showSensitiveActionAuthSheet(
+      context,
+      title: '备份助记词',
+      reason: '查看恢复助记词前请再次验证身份。',
+    );
+    if (!approved || !context.mounted) {
+      return;
+    }
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const MnemonicBackupPage()));
+  }
+
+  Future<void> _guardSensitiveAction(BuildContext context, String title) async {
+    final approved = await showSensitiveActionAuthSheet(
+      context,
+      title: title,
+      reason: '继续前请验证身份，避免高风险操作被误触发。',
+    );
+    if (!approved || !context.mounted) {
+      return;
+    }
+    _showRiskDialog(context, title);
   }
 
   void _showRiskDialog(BuildContext context, String title) {

@@ -86,8 +86,6 @@ class _ActivityPageState extends State<ActivityPage> {
                   record.type == ActivityType.receive,
             )
             .toList(growable: false),
-      ActivitySection.investments => const <ActivityRecord>[],
-      ActivitySection.predictions => const <ActivityRecord>[],
     };
 
     if (!_showRecordFilters) {
@@ -102,8 +100,6 @@ class _ActivityPageState extends State<ActivityPage> {
     return switch (section) {
       ActivitySection.transactions => Icons.receipt_long_outlined,
       ActivitySection.transfers => Icons.swap_vert_rounded,
-      ActivitySection.investments => Icons.trending_up_rounded,
-      ActivitySection.predictions => Icons.query_stats_rounded,
     };
   }
 
@@ -111,8 +107,6 @@ class _ActivityPageState extends State<ActivityPage> {
     return switch (section) {
       ActivitySection.transactions => '您暂无交易记录',
       ActivitySection.transfers => '您暂无转账记录',
-      ActivitySection.investments => '您暂无投资记录',
-      ActivitySection.predictions => '您暂无预测记录',
     };
   }
 
@@ -120,13 +114,11 @@ class _ActivityPageState extends State<ActivityPage> {
     return switch (section) {
       ActivitySection.transactions => '钱包交易、签名和授权记录会显示在这里。',
       ActivitySection.transfers => '发送和接收 Token 的记录会显示在这里。',
-      ActivitySection.investments => '当前阶段仅展示记录，不开放投资功能入口。',
-      ActivitySection.predictions => '当前阶段仅展示记录，不开放预测功能入口。',
     };
   }
 }
 
-enum ActivitySection { transactions, transfers, investments, predictions }
+enum ActivitySection { transactions, transfers }
 
 class _ActivitySectionTabs extends StatelessWidget {
   const _ActivitySectionTabs({required this.selected, required this.onChanged});
@@ -157,8 +149,6 @@ class _ActivitySectionTabs extends StatelessWidget {
     return switch (section) {
       ActivitySection.transactions => '交易',
       ActivitySection.transfers => '转账',
-      ActivitySection.investments => '投资',
-      ActivitySection.predictions => '预测',
     };
   }
 }

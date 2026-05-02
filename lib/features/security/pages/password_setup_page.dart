@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_card.dart';
+import '../../wallet/providers/wallet_state_scope.dart';
 
 class PasswordSetupPage extends StatefulWidget {
   const PasswordSetupPage({super.key});
@@ -74,12 +75,25 @@ class _PasswordSetupPageState extends State<PasswordSetupPage> {
     );
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (_newController.text.length < 8 ||
         _newController.text != _confirmController.text) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Check the new password')));
+      return;
+    }
+    final updated = await context.walletState.changePassword(
+      currentPassword: _currentController.text,
+      newPassword: _newController.text,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (!updated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Current password is incorrect')),
+      );
       return;
     }
     ScaffoldMessenger.of(

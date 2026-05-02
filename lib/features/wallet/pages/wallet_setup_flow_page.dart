@@ -21,21 +21,26 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
   final _mnemonicController = TextEditingController();
   final _verifyController = TextEditingController();
   int _step = 0;
+  String? _generatedMnemonic;
 
-  static const _mnemonic = [
-    'river',
-    'silver',
-    'orbit',
-    'fabric',
-    'cactus',
-    'lunar',
-    'velvet',
-    'harbor',
-    'matrix',
-    'signal',
-    'ocean',
-    'anchor',
-  ];
+  List<String> get _generatedWords => (_generatedMnemonic ?? '')
+      .split(RegExp(r'\s+'))
+      .where((word) => word.isNotEmpty)
+      .toList(growable: false);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.mode == WalletSetupMode.create) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final mnemonic = await context.walletState.generateRecoveryPhrase();
+        if (!mounted) {
+          return;
+        }
+        setState(() => _generatedMnemonic = mnemonic);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -85,19 +90,24 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
                 'Write down the recovery phrase in order and keep it offline. Anyone with this phrase can control the wallet.',
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (var i = 0; i < _mnemonic.length; i++)
-                Chip(label: Text('${i + 1}. ${_mnemonic[i]}')),
-            ],
-          ),
+          if (_generatedMnemonic == null)
+            const Center(child: CircularProgressIndicator())
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < _generatedWords.length; i++)
+                  Chip(label: Text('${i + 1}. ${_generatedWords[i]}')),
+              ],
+            ),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => setState(() => _step = 2),
+              onPressed: _generatedMnemonic == null
+                  ? null
+                  : () => setState(() => _step = 2),
               icon: const Icon(Icons.check_circle_outline),
               label: const Text('I Backed It Up'),
             ),
@@ -108,7 +118,7 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Verify word 11',
+            'Verify recovery word',
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
@@ -116,7 +126,11 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
           const SizedBox(height: 12),
           TextField(
             controller: _verifyController,
-            decoration: const InputDecoration(labelText: 'Word 11'),
+            decoration: InputDecoration(
+              labelText: _generatedWords.isEmpty
+                  ? 'Recovery word'
+                  : 'Word ${(_generatedWords.length >= 11 ? 11 : _generatedWords.length)}',
+            ),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -152,11 +166,9 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: () {
-                if (_mnemonicController.text
-                        .trim()
-                        .split(RegExp(r'\s+'))
-                        .length <
-                    12) {
+                if (!context.walletState.isValidRecoveryPhrase(
+                  _mnemonicController.text,
+                )) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Enter at least 12 words')),
                   );
@@ -217,19 +229,40 @@ class _WalletSetupFlowPageState extends State<WalletSetupFlowPage> {
     setState(() => _step += 1);
   }
 
-  void _finishCreate() {
-    if (_verifyController.text.trim().toLowerCase() != 'ocean') {
+  Future<void> _finishCreate() async {
+    final verificationIndex = _generatedWords.length >= 11
+        ? 10
+        : _generatedWords.length - 1;
+    if (_generatedWords.isEmpty ||
+        _verifyController.text.trim().toLowerCase() !=
+            _generatedWords[verificationIndex]) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Verification word is incorrect')),
       );
       return;
     }
-    context.walletState.createWallet(name: _walletNameController.text);
+    final state = context.walletState;
+    await state.createWallet(
+      name: _walletNameController.text,
+      mnemonic: _generatedMnemonic ?? '',
+    );
+    await state.configurePassword(_passwordController.text);
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pop();
   }
 
-  void _finishImport() {
-    context.walletState.importWallet(name: _walletNameController.text);
+  Future<void> _finishImport() async {
+    final state = context.walletState;
+    await state.importWallet(
+      name: _walletNameController.text,
+      mnemonic: _mnemonicController.text,
+    );
+    await state.configurePassword(_passwordController.text);
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pop();
   }
 }

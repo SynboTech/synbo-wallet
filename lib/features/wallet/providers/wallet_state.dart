@@ -1,270 +1,84 @@
+import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
+import 'package:web3dart/web3dart.dart';
 
+import '../../../app/wallet_dependencies.dart';
+import '../../security/data/security_repository.dart';
+import '../data/wallet_chain_read_gateway.dart';
+import '../data/wallet_data_repository.dart';
+import '../data/wallet_vault_repository.dart';
 import '../models/wallet_models.dart';
 
 class WalletAppState extends ChangeNotifier {
-  WalletAppState()
-    : _wallets = _seedWallets,
-      _networks = _seedNetworks,
-      _tokens = _seedTokens,
-      _activities = _seedActivities;
+  WalletAppState({required WalletAppDependencies dependencies})
+    : _dependencies = dependencies,
+      _httpClient = dependencies.httpClient;
 
-  static final _createdAt = DateTime(2026, 4, 30, 10, 15);
+  static const bootstrapPassword = '12345678';
+  static const _defaultSecuritySettings = SecuritySettingsSnapshot(
+    hideBalances: false,
+    biometricEnabled: false,
+    screenshotProtectionEnabled: true,
+    notificationsEnabled: true,
+    autoLockMinutes: 5,
+  );
+  static const _developmentSeedMnemonic =
+      'test test test test test test test test test test test junk';
 
-  static final List<WalletProfile> _seedWallets = [
-    WalletProfile(
-      id: 'wallet-1',
-      name: 'Wallet 1',
-      activeAccountId: 'account-1',
-      createdAt: _createdAt,
-      accounts: const [
-        WalletAccount(
-          id: 'account-1',
-          name: 'Main Account',
-          address: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-        ),
-        WalletAccount(
-          id: 'account-2',
-          name: 'Savings',
-          address: '0x8C421fA7057180eF5e401aE6eaa47334C9dA41F0',
-        ),
-      ],
-    ),
-  ];
+  final WalletAppDependencies _dependencies;
+  final Client _httpClient;
 
-  static final List<ChainNetwork> _seedNetworks = [
-    const ChainNetwork(
-      id: 'ethereum',
-      name: 'Ethereum',
-      nativeSymbol: 'ETH',
-      rpcUrl: 'https://mainnet.infura.io/v3/demo',
-      explorerUrl: 'https://etherscan.io',
-      colorValue: 0xFF5B6EE1,
-    ),
-    const ChainNetwork(
-      id: 'bnb',
-      name: 'BNB Chain',
-      nativeSymbol: 'BNB',
-      rpcUrl: 'https://bsc-dataseed.binance.org',
-      explorerUrl: 'https://bscscan.com',
-      colorValue: 0xFFD4A916,
-    ),
-    const ChainNetwork(
-      id: 'polygon',
-      name: 'Polygon',
-      nativeSymbol: 'POL',
-      rpcUrl: 'https://polygon-rpc.com',
-      explorerUrl: 'https://polygonscan.com',
-      colorValue: 0xFF7B3FE4,
-    ),
-    const ChainNetwork(
-      id: 'arbitrum',
-      name: 'Arbitrum',
-      nativeSymbol: 'ETH',
-      rpcUrl: 'https://arb1.arbitrum.io/rpc',
-      explorerUrl: 'https://arbiscan.io',
-      colorValue: 0xFF2D74C4,
-    ),
-    const ChainNetwork(
-      id: 'base',
-      name: 'Base',
-      nativeSymbol: 'ETH',
-      rpcUrl: 'https://mainnet.base.org',
-      explorerUrl: 'https://basescan.org',
-      colorValue: 0xFF2364E8,
-    ),
-  ];
+  late List<WalletProfile> _wallets;
+  late List<ChainNetwork> _networks;
+  late List<TokenAsset> _tokens;
+  late List<ActivityRecord> _activities;
+  late Map<String, int> _activitySyncBlocks;
+  late String _activeWalletId;
+  late String _activeNetworkId;
 
-  static final List<TokenAsset> _seedTokens = [
-    const TokenAsset(
-      id: 'eth-main',
-      name: 'Ethereum',
-      symbol: 'ETH',
-      balance: 1.2845,
-      fiatValue: 4218.30,
-      networkId: 'ethereum',
-      contractAddress: 'Native asset',
-      colorValue: 0xFF5B6EE1,
-    ),
-    const TokenAsset(
-      id: 'usdc-main',
-      name: 'USD Coin',
-      symbol: 'USDC',
-      balance: 2480.75,
-      fiatValue: 2480.75,
-      networkId: 'ethereum',
-      contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-      colorValue: 0xFF2775CA,
-    ),
-    const TokenAsset(
-      id: 'airdrop-main',
-      name: 'Airdrop Claim',
-      symbol: 'DROP',
-      balance: 12000,
-      fiatValue: 0.02,
-      networkId: 'ethereum',
-      contractAddress: '0x000000000000000000000000000000000000dEaD',
-      colorValue: 0xFFB3261E,
-      isRisky: true,
-      riskLabel: 'Unverified token',
-    ),
-    const TokenAsset(
-      id: 'bnb-main',
-      name: 'BNB',
-      symbol: 'BNB',
-      balance: 4.92,
-      fiatValue: 2968.44,
-      networkId: 'bnb',
-      contractAddress: 'Native asset',
-      colorValue: 0xFFD4A916,
-    ),
-    const TokenAsset(
-      id: 'pol-main',
-      name: 'Polygon Ecosystem Token',
-      symbol: 'POL',
-      balance: 850.10,
-      fiatValue: 612.07,
-      networkId: 'polygon',
-      contractAddress: 'Native asset',
-      colorValue: 0xFF7B3FE4,
-    ),
-    const TokenAsset(
-      id: 'arb-main',
-      name: 'Arbitrum',
-      symbol: 'ARB',
-      balance: 920.45,
-      fiatValue: 1049.31,
-      networkId: 'arbitrum',
-      contractAddress: '0x912CE59144191C1204E64559FE8253a0e49E6548',
-      colorValue: 0xFF2D74C4,
-    ),
-    const TokenAsset(
-      id: 'base-eth',
-      name: 'Ethereum',
-      symbol: 'ETH',
-      balance: 0.428,
-      fiatValue: 1406.12,
-      networkId: 'base',
-      contractAddress: 'Native asset',
-      colorValue: 0xFF2364E8,
-    ),
-  ];
-
-  static final List<ActivityRecord> _seedActivities = [
-    ActivityRecord(
-      id: 'act-1',
-      type: ActivityType.send,
-      status: ActivityStatus.success,
-      title: 'Send ETH',
-      from: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-      to: '0xD8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-      networkId: 'ethereum',
-      tokenSymbol: 'ETH',
-      amount: 0.12,
-      gasFee: 0.0032,
-      txHash:
-          '0x9b6f2d3a0c5e4f8b1c2d31a9123b60745fc98d53c7b1f9e32b3f71b10a621e44',
-      occurredAt: DateTime(2026, 4, 30, 9, 42),
-    ),
-    ActivityRecord(
-      id: 'act-2',
-      type: ActivityType.receive,
-      status: ActivityStatus.success,
-      title: 'Receive USDC',
-      from: '0x8A91f4472BC2b3D4a61df9A512eE38C456dD1072',
-      to: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-      networkId: 'ethereum',
-      tokenSymbol: 'USDC',
-      amount: 420.00,
-      gasFee: 0.0,
-      txHash:
-          '0x4a7c2e9f8311ef042d74881d5e7f710e8a4fbe2ef52cb6a79fb96ce5d502aa17',
-      occurredAt: DateTime(2026, 4, 29, 16, 8),
-    ),
-    ActivityRecord(
-      id: 'act-3',
-      type: ActivityType.send,
-      status: ActivityStatus.pending,
-      title: 'Send POL',
-      from: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-      to: '0x2A4381e6D28D74C8B1419A7D3d6D02Ab17e64d42',
-      networkId: 'polygon',
-      tokenSymbol: 'POL',
-      amount: 75.0,
-      gasFee: 0.018,
-      txHash:
-          '0x2fb49c840ca56e90e60399f3dc6ef4d8b152ad6d3dc60a5d9d8cebb0f9cc11a5',
-      occurredAt: DateTime(2026, 4, 30, 10, 3),
-      riskNote: 'Pending network confirmation',
-    ),
-    ActivityRecord(
-      id: 'act-4',
-      type: ActivityType.signature,
-      status: ActivityStatus.success,
-      title: 'Message signature',
-      from: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-      to: 'app.safe.example',
-      networkId: 'ethereum',
-      tokenSymbol: 'SIGN',
-      amount: 0,
-      gasFee: 0,
-      txHash: 'local-signature-202604300915',
-      occurredAt: DateTime(2026, 4, 30, 9, 15),
-      dappName: 'Safe App',
-    ),
-    ActivityRecord(
-      id: 'act-5',
-      type: ActivityType.approval,
-      status: ActivityStatus.failed,
-      title: 'Token approval blocked',
-      from: '0x12F36A8c91b4eF9a2A436E81eC2D4b478A3B7089',
-      to: '0x000000000000000000000000000000000000dEaD',
-      networkId: 'ethereum',
-      tokenSymbol: 'DROP',
-      amount: 12000,
-      gasFee: 0.0011,
-      txHash:
-          '0x7ce0b5117e853e37acd43a5326f6f22cc4e6bb4c2c2d33e8098f050a0c7e7172',
-      occurredAt: DateTime(2026, 4, 28, 13, 25),
-      riskNote: 'Suspicious spender address',
-      dappName: 'Unknown App',
-    ),
-  ];
-
-  final List<WalletProfile> _wallets;
-  final List<ChainNetwork> _networks;
-  final List<TokenAsset> _tokens;
-  final List<ActivityRecord> _activities;
-
-  int _activeWalletIndex = 0;
-  String _activeNetworkId = 'ethereum';
+  bool _isInitialized = false;
+  bool _isUnlocked = false;
   bool _hideBalances = false;
   bool _isRefreshing = false;
   String? _assetError;
   DateTime? _lastRefreshedAt;
-  bool _biometricEnabled = true;
+  bool _biometricEnabled = false;
+  bool _biometricAvailable = false;
   bool _screenshotProtectionEnabled = true;
   bool _notificationsEnabled = true;
   int _autoLockMinutes = 5;
+  DateTime? _backgroundedAt;
+
+  bool get isInitialized => _isInitialized;
+  bool get isUnlocked => _isUnlocked;
+  bool get hideBalances => _hideBalances;
+  bool get isRefreshing => _isRefreshing;
+  String? get assetError => _assetError;
+  DateTime? get lastRefreshedAt => _lastRefreshedAt;
+  bool get biometricEnabled => _biometricEnabled;
+  bool get biometricAvailable => _biometricAvailable;
+  bool get canUseBiometrics => _biometricEnabled && _biometricAvailable;
+  bool get screenshotProtectionEnabled => _screenshotProtectionEnabled;
+  bool get notificationsEnabled => _notificationsEnabled;
+  int get autoLockMinutes => _autoLockMinutes;
+  bool get isReadyForSensitiveActions => _isUnlocked && _isInitialized;
 
   List<WalletProfile> get wallets => List.unmodifiable(_wallets);
   List<ChainNetwork> get networks => List.unmodifiable(_networks);
   List<TokenAsset> get tokens => List.unmodifiable(_tokens);
   List<ActivityRecord> get activities => List.unmodifiable(_activities);
 
-  WalletProfile get currentWallet => _wallets[_activeWalletIndex];
+  WalletProfile get currentWallet => _wallets.firstWhere(
+    (wallet) => wallet.id == _activeWalletId,
+    orElse: () => _wallets.first,
+  );
+
   WalletAccount get currentAccount => currentWallet.activeAccount;
+
   ChainNetwork get currentNetwork => networkById(_activeNetworkId);
-  bool get hideBalances => _hideBalances;
-  bool get isRefreshing => _isRefreshing;
-  String? get assetError => _assetError;
-  DateTime? get lastRefreshedAt => _lastRefreshedAt;
-  bool get biometricEnabled => _biometricEnabled;
-  bool get screenshotProtectionEnabled => _screenshotProtectionEnabled;
-  bool get notificationsEnabled => _notificationsEnabled;
-  int get autoLockMinutes => _autoLockMinutes;
 
   double get totalAssetsUsd => _tokens
       .where((token) => !token.isHidden)
@@ -273,6 +87,134 @@ class WalletAppState extends ChangeNotifier {
   List<TokenAsset> get visibleTokens => _tokens
       .where((token) => !token.isHidden && token.networkId == _activeNetworkId)
       .toList(growable: false);
+
+  Future<void> initialize() async {
+    if (_isInitialized) {
+      return;
+    }
+
+    final snapshot = await _dependencies.dataRepository.load();
+    final securityProfile = await _dependencies.securityRepository.readProfile(
+      bootstrapPassword: bootstrapPassword,
+      fallbackSettings: _defaultSecuritySettings,
+    );
+    _wallets = snapshot.wallets.toList(growable: true);
+    _networks = snapshot.networks.toList(growable: true);
+    _tokens = snapshot.tokens.toList(growable: true);
+    _activities = snapshot.activities.toList(growable: true);
+    _activitySyncBlocks = Map<String, int>.from(snapshot.activitySyncBlocks);
+    _activeWalletId = snapshot.activeWalletId;
+    _activeNetworkId = snapshot.activeNetworkId;
+    _lastRefreshedAt = snapshot.lastRefreshedAt;
+    await _ensureWalletVaults();
+    _hideBalances = securityProfile.settings.hideBalances;
+    _biometricEnabled = securityProfile.settings.biometricEnabled;
+    _screenshotProtectionEnabled =
+        securityProfile.settings.screenshotProtectionEnabled;
+    _notificationsEnabled = securityProfile.settings.notificationsEnabled;
+    _autoLockMinutes = securityProfile.settings.autoLockMinutes;
+    _biometricAvailable = await _dependencies.deviceSecurityService
+        .isBiometricAvailable();
+    await _dependencies.deviceSecurityService.setScreenshotProtection(
+      _screenshotProtectionEnabled,
+    );
+    _isInitialized = true;
+    notifyListeners();
+  }
+
+  Future<bool> unlock(String password) async {
+    final isValid = await _dependencies.securityRepository.verifyPassword(
+      password,
+    );
+    if (!isValid) {
+      return false;
+    }
+    _isUnlocked = true;
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> unlockWithBiometrics() async {
+    if (!canUseBiometrics) {
+      return false;
+    }
+    final authenticated = await _dependencies.deviceSecurityService
+        .authenticate(reason: '使用生物识别解锁钱包');
+    if (!authenticated) {
+      return false;
+    }
+    _isUnlocked = true;
+    notifyListeners();
+    return true;
+  }
+
+  void lock() {
+    if (!_isUnlocked) {
+      return;
+    }
+    _isUnlocked = false;
+    notifyListeners();
+  }
+
+  void onLifecycleChanged(AppLifecycleState state) {
+    if (!_isInitialized) {
+      return;
+    }
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        _backgroundedAt ??= DateTime.now();
+      case AppLifecycleState.resumed:
+        if (_backgroundedAt != null && _isUnlocked) {
+          final elapsed = DateTime.now().difference(_backgroundedAt!);
+          if (elapsed.inMinutes >= _autoLockMinutes) {
+            lock();
+          }
+        }
+        _backgroundedAt = null;
+      case AppLifecycleState.detached:
+        _backgroundedAt = DateTime.now();
+    }
+  }
+
+  Future<bool> authorizeSensitiveAction({
+    String? password,
+    String reason = '验证身份以继续操作',
+  }) async {
+    if (password != null && password.trim().isNotEmpty) {
+      return _dependencies.securityRepository.verifyPassword(password);
+    }
+    if (!canUseBiometrics) {
+      return false;
+    }
+    return _dependencies.deviceSecurityService.authenticate(reason: reason);
+  }
+
+  Future<void> configurePassword(String password) async {
+    final trimmed = password.trim();
+    if (trimmed.length < 8) {
+      return;
+    }
+    await _dependencies.securityRepository.writePassword(trimmed);
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (newPassword.trim().length < 8) {
+      return false;
+    }
+    final verified = await _dependencies.securityRepository.verifyPassword(
+      currentPassword,
+    );
+    if (!verified) {
+      return false;
+    }
+    await _dependencies.securityRepository.writePassword(newPassword.trim());
+    return true;
+  }
 
   ChainNetwork networkById(String id) => _networks.firstWhere(
     (network) => network.id == id,
@@ -316,6 +258,8 @@ class WalletAppState extends ChangeNotifier {
   void switchNetwork(String id) {
     _activeNetworkId = id;
     notifyListeners();
+    unawaited(_persistData());
+    unawaited(refreshAssets());
   }
 
   void switchWallet(String id) {
@@ -323,8 +267,10 @@ class WalletAppState extends ChangeNotifier {
     if (index == -1) {
       return;
     }
-    _activeWalletIndex = index;
+    _activeWalletId = _wallets[index].id;
     notifyListeners();
+    unawaited(_persistData());
+    unawaited(refreshAssets());
   }
 
   void switchAccount(String id) {
@@ -332,8 +278,11 @@ class WalletAppState extends ChangeNotifier {
     if (!wallet.accounts.any((account) => account.id == id)) {
       return;
     }
-    _wallets[_activeWalletIndex] = wallet.copyWith(activeAccountId: id);
+    final index = _wallets.indexWhere((item) => item.id == wallet.id);
+    _wallets[index] = wallet.copyWith(activeAccountId: id);
     notifyListeners();
+    unawaited(_persistData());
+    unawaited(refreshAssets());
   }
 
   void renameCurrentWallet(String name) {
@@ -341,13 +290,18 @@ class WalletAppState extends ChangeNotifier {
     if (trimmed.isEmpty) {
       return;
     }
-    _wallets[_activeWalletIndex] = currentWallet.copyWith(name: trimmed);
+    final index = _wallets.indexWhere(
+      (wallet) => wallet.id == currentWallet.id,
+    );
+    _wallets[index] = currentWallet.copyWith(name: trimmed);
     notifyListeners();
+    unawaited(_persistData());
   }
 
-  void toggleHideBalances() {
+  Future<void> toggleHideBalances() async {
     _hideBalances = !_hideBalances;
     notifyListeners();
+    await _persistSecurity();
   }
 
   Future<void> refreshAssets() async {
@@ -357,10 +311,27 @@ class WalletAppState extends ChangeNotifier {
     _isRefreshing = true;
     _assetError = null;
     notifyListeners();
-    await Future<void>.delayed(const Duration(milliseconds: 650));
-    _lastRefreshedAt = DateTime.now();
-    _isRefreshing = false;
-    notifyListeners();
+    try {
+      final result = await _dependencies.chainReadGateway.refresh(
+        accountAddress: currentAccount.address,
+        network: currentNetwork,
+        tokens: _tokens,
+        activities: _activities,
+        fromBlock: _activitySyncBlocks[currentNetwork.id],
+      );
+      _mergeNetworkTokens(result.tokens);
+      _mergeNetworkActivities(result.activities);
+      if (result.syncedFromBlock != null) {
+        _activitySyncBlocks[currentNetwork.id] = result.syncedFromBlock!;
+      }
+      _lastRefreshedAt = DateTime.now();
+    } on ChainReadException catch (error) {
+      _assetError = error.message;
+    } finally {
+      _isRefreshing = false;
+      notifyListeners();
+      await _persistData();
+    }
   }
 
   void toggleTokenHidden(String tokenId) {
@@ -372,12 +343,14 @@ class WalletAppState extends ChangeNotifier {
       isHidden: !_tokens[index].isHidden,
     );
     notifyListeners();
+    unawaited(_persistData());
   }
 
   void addToken({
     required String name,
     required String symbol,
     required String contractAddress,
+    int decimals = 18,
     double balance = 0,
   }) {
     final now = DateTime.now().microsecondsSinceEpoch;
@@ -387,6 +360,7 @@ class WalletAppState extends ChangeNotifier {
         id: 'custom-$now',
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
+        decimals: decimals,
         balance: balance,
         fiatValue: 0,
         networkId: _activeNetworkId,
@@ -397,59 +371,295 @@ class WalletAppState extends ChangeNotifier {
       ),
     );
     notifyListeners();
+    unawaited(_persistData());
   }
 
-  void submitTransfer(PendingTransfer transfer) {
-    final suffix = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
-    _activities.insert(
-      0,
-      ActivityRecord(
-        id: 'activity-$suffix',
-        type: ActivityType.send,
-        status: ActivityStatus.pending,
-        title: 'Send ${transfer.token.symbol}',
-        from: transfer.from,
-        to: transfer.to,
-        networkId: transfer.network.id,
-        tokenSymbol: transfer.token.symbol,
-        amount: transfer.amount,
-        gasFee: transfer.gasFee,
-        txHash:
-            '0x$suffix${Random().nextInt(1 << 32).toRadixString(16).padLeft(8, '0')}',
-        occurredAt: DateTime.now(),
-        riskNote: transfer.riskWarning,
-      ),
+  Future<PendingTransfer> prepareTransfer({
+    required TokenAsset token,
+    required String toAddress,
+    required String amountText,
+  }) async {
+    final vaultRecord = await _loadVaultRecord(currentWallet.id);
+    try {
+      return await _dependencies.transactionGateway.prepareTransfer(
+        fromAddress: currentAccount.address,
+        privateKeyHex: vaultRecord.privateKeyHex,
+        toAddress: toAddress,
+        network: networkById(token.networkId),
+        token: token,
+        amountText: amountText,
+      );
+    } on TransactionPreparationException catch (error) {
+      _assetError = error.message;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> submitTransfer(PendingTransfer transfer) async {
+    final vaultRecord = await _loadVaultRecord(currentWallet.id);
+    try {
+      final activity = await _dependencies.transactionGateway.submitTransfer(
+        transfer: transfer,
+        privateKeyHex: vaultRecord.privateKeyHex,
+      );
+      _activities.insert(0, activity);
+      notifyListeners();
+      await _persistData();
+    } on TransactionSubmissionException catch (error) {
+      _assetError = error.message;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  /// Speed Up 交易：使用相同 nonce 但更高的 gas 价格
+  Future<PendingTransfer> speedUpTransaction({
+    required ActivityRecord pendingActivity,
+    double speedUpFactor = 1.5,
+  }) async {
+    if (pendingActivity.status != ActivityStatus.pending) {
+      throw const TransactionPreparationException(
+        'Only pending transactions can be sped up.',
+      );
+    }
+
+    await _loadVaultRecord(currentWallet.id);
+    final network = networkById(pendingActivity.networkId);
+
+    final client = Web3Client(network.rpcUrl, _httpClient);
+    try {
+      final originalTx = await client.getTransactionByHash(
+        pendingActivity.txHash,
+      );
+      if (originalTx == null) {
+        throw const TransactionPreparationException(
+          'Original transaction not found.',
+        );
+      }
+
+      final nonce = originalTx.nonce;
+
+      // 获取原始 gas 价格并计算新的
+      final oldGasPrice = originalTx.gasPrice.getInWei;
+      final newGasPrice =
+          (oldGasPrice * BigInt.from((speedUpFactor * 100).toInt())) ~/
+          BigInt.from(100);
+
+      // 获取 token 信息
+      final token = _tokens.firstWhere(
+        (t) =>
+            t.symbol == pendingActivity.tokenSymbol &&
+            t.networkId == pendingActivity.networkId,
+        orElse: () => TokenAsset(
+          id: 'unknown',
+          name: pendingActivity.tokenSymbol,
+          symbol: pendingActivity.tokenSymbol,
+          decimals: 18,
+          balance: 0,
+          fiatValue: 0,
+          networkId: pendingActivity.networkId,
+          contractAddress: 'Native asset',
+          colorValue: 0xFF8A8D8E,
+        ),
+      );
+
+      // 计算新 gas fee
+      final gasLimit = originalTx.gas;
+      final gasFeeWei = (newGasPrice * BigInt.from(gasLimit));
+
+      return PendingTransfer(
+        from: pendingActivity.from,
+        to: pendingActivity.to,
+        network: network,
+        token: token,
+        amountText: pendingActivity.amount.toString(),
+        amount: pendingActivity.amount,
+        amountInBaseUnits: _parseAmount(pendingActivity.amount, token.decimals),
+        valueInWei: _isNativeToken(token)
+            ? _parseAmount(pendingActivity.amount, token.decimals)
+            : BigInt.zero,
+        gasFee: _formatWeiAsDouble(gasFeeWei, 18),
+        gasFeeWei: gasFeeWei,
+        gasPriceWei: newGasPrice,
+        gasLimit: gasLimit,
+        nonce: nonce,
+        chainId: network.chainId > 0 ? network.chainId : 1,
+        data: originalTx.input,
+        riskWarning:
+            'Speed up: replacing transaction with higher gas. Original tx: ${pendingActivity.txHash}',
+        isEIP1559: false, // 简化处理，使用 legacy
+        maxFeePerGas: null,
+        maxPriorityFeePerGas: null,
+        originalTxHash: pendingActivity.txHash,
+        isSpeedUp: true,
+      );
+    } finally {
+      await client.dispose();
+    }
+  }
+
+  /// Cancel 交易：发送 0 金额给自己来取消 pending 交易
+  Future<PendingTransfer> cancelTransaction({
+    required ActivityRecord pendingActivity,
+    double speedUpFactor = 1.5,
+  }) async {
+    if (pendingActivity.status != ActivityStatus.pending) {
+      throw const TransactionPreparationException(
+        'Only pending transactions can be cancelled.',
+      );
+    }
+
+    await _loadVaultRecord(currentWallet.id);
+    final network = networkById(pendingActivity.networkId);
+
+    final client = Web3Client(network.rpcUrl, _httpClient);
+    try {
+      final originalTx = await client.getTransactionByHash(
+        pendingActivity.txHash,
+      );
+      if (originalTx == null) {
+        throw const TransactionPreparationException(
+          'Original transaction not found.',
+        );
+      }
+      final nonce = originalTx.nonce;
+
+      // 计算新的 gas 价格
+      final oldGasPrice = originalTx.gasPrice.getInWei;
+      final newGasPrice =
+          (oldGasPrice * BigInt.from((speedUpFactor * 100).toInt())) ~/
+          BigInt.from(100);
+
+      return PendingTransfer(
+        from: pendingActivity.from,
+        to: pendingActivity.from, // 发送给自己
+        network: network,
+        token: TokenAsset(
+          id: '${network.id}-native',
+          name: network.name,
+          symbol: network.nativeSymbol,
+          decimals: 18,
+          balance: 0,
+          fiatValue: 0,
+          networkId: network.id,
+          contractAddress: 'Native asset',
+          colorValue: network.colorValue,
+        ),
+        amountText: '0',
+        amount: 0,
+        amountInBaseUnits: BigInt.zero,
+        valueInWei: BigInt.zero,
+        gasFee: _formatWeiAsDouble(
+          newGasPrice * BigInt.from(originalTx.gas),
+          18,
+        ),
+        gasFeeWei: newGasPrice * BigInt.from(originalTx.gas),
+        gasPriceWei: newGasPrice,
+        gasLimit: originalTx.gas,
+        nonce: nonce,
+        chainId: network.chainId > 0 ? network.chainId : 1,
+        data: null,
+        riskWarning:
+            'Cancel: sending 0 to yourself to cancel the pending transaction. Original tx: ${pendingActivity.txHash}',
+        isEIP1559: false,
+        originalTxHash: pendingActivity.txHash,
+        isCancel: true,
+      );
+    } finally {
+      await client.dispose();
+    }
+  }
+
+  BigInt _parseAmount(double amount, int decimals) {
+    final value = amount * pow(10, decimals);
+    return BigInt.from(value.toInt());
+  }
+
+  double _formatWeiAsDouble(BigInt wei, int decimals) {
+    if (wei == BigInt.zero) return 0;
+    final digits = wei.abs().toString();
+    if (digits.length <= decimals) {
+      return double.parse('0.${digits.padLeft(decimals + 1, '0')}');
+    }
+    final splitIndex = digits.length - decimals;
+    return double.parse(
+      '${digits.substring(0, splitIndex)}.${digits.substring(splitIndex)}',
     );
-    notifyListeners();
   }
 
-  void createWallet({required String name}) {
+  bool _isNativeToken(TokenAsset token) {
+    return token.contractAddress == 'Native asset';
+  }
+
+  Future<String> generateRecoveryPhrase() async {
+    return _dependencies.importGateway.generateMnemonic();
+  }
+
+  Future<void> createWallet({
+    required String name,
+    required String mnemonic,
+  }) async {
     final now = DateTime.now().microsecondsSinceEpoch;
+    final walletId = 'wallet-$now';
     final accountId = 'account-$now';
-    _wallets.add(
-      WalletProfile(
-        id: 'wallet-$now',
-        name: name.trim().isEmpty
-            ? 'Wallet ${_wallets.length + 1}'
-            : name.trim(),
-        activeAccountId: accountId,
-        createdAt: DateTime.now(),
-        accounts: [
-          WalletAccount(
-            id: accountId,
-            name: 'Main Account',
-            address:
-                '0x${now.toRadixString(16).padLeft(40, '0').substring(0, 40)}',
-          ),
-        ],
-      ),
+    final vaultRecord = _dependencies.importGateway.derivePrimaryAccount(
+      walletId: walletId,
+      mnemonic: mnemonic,
     );
-    _activeWalletIndex = _wallets.length - 1;
+    final wallet = WalletProfile(
+      id: walletId,
+      name: name.trim().isEmpty ? 'Wallet ${_wallets.length + 1}' : name.trim(),
+      activeAccountId: accountId,
+      createdAt: DateTime.now(),
+      accounts: [
+        WalletAccount(
+          id: accountId,
+          name: 'Main Account',
+          address: vaultRecord.address,
+        ),
+      ],
+    );
+    _wallets.add(wallet);
+    _activeWalletId = wallet.id;
     notifyListeners();
+    await _dependencies.vaultRepository.saveRecord(vaultRecord);
+    await _persistData();
   }
 
-  void importWallet({required String name}) {
-    createWallet(name: name.trim().isEmpty ? 'Imported Wallet' : name.trim());
+  Future<void> importWallet({
+    required String name,
+    required String mnemonic,
+  }) async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final walletId = 'wallet-$now';
+    final accountId = 'account-$now';
+    final vaultRecord = _dependencies.importGateway.derivePrimaryAccount(
+      walletId: walletId,
+      mnemonic: mnemonic,
+    );
+    final wallet = WalletProfile(
+      id: walletId,
+      name: name.trim().isEmpty ? 'Imported Wallet' : name.trim(),
+      activeAccountId: accountId,
+      createdAt: DateTime.now(),
+      accounts: [
+        WalletAccount(
+          id: accountId,
+          name: 'Main Account',
+          address: vaultRecord.address,
+        ),
+      ],
+    );
+    _wallets.add(wallet);
+    _activeWalletId = wallet.id;
+    notifyListeners();
+    await _dependencies.vaultRepository.saveRecord(vaultRecord);
+    await _persistData();
+  }
+
+  bool isValidRecoveryPhrase(String mnemonic) {
+    return _dependencies.importGateway.isValidMnemonic(mnemonic);
   }
 
   void addCustomNetwork({
@@ -463,6 +673,7 @@ class WalletAppState extends ChangeNotifier {
       ChainNetwork(
         id: 'custom-$now',
         name: name.trim(),
+        chainId: 0,
         nativeSymbol: nativeSymbol.trim().toUpperCase(),
         rpcUrl: rpcUrl.trim(),
         explorerUrl: explorerUrl.trim(),
@@ -471,6 +682,7 @@ class WalletAppState extends ChangeNotifier {
       ),
     );
     notifyListeners();
+    unawaited(_persistData());
   }
 
   void updateNetwork({
@@ -494,6 +706,7 @@ class WalletAppState extends ChangeNotifier {
       explorerUrl: explorerUrl.trim(),
     );
     notifyListeners();
+    unawaited(_persistData());
   }
 
   void updateCustomNetwork({
@@ -530,27 +743,227 @@ class WalletAppState extends ChangeNotifier {
       _activeNetworkId = _networks.first.id;
     }
     notifyListeners();
+    unawaited(_persistData());
   }
 
-  void updateSecurity({
-    bool? biometricEnabled,
+  Future<bool> setBiometricEnabled(bool value) async {
+    if (value) {
+      _biometricAvailable = await _dependencies.deviceSecurityService
+          .isBiometricAvailable();
+      if (!_biometricAvailable) {
+        notifyListeners();
+        return false;
+      }
+      final approved = await _dependencies.deviceSecurityService.authenticate(
+        reason: '启用生物识别保护钱包',
+      );
+      if (!approved) {
+        return false;
+      }
+    }
+    _biometricEnabled = value;
+    notifyListeners();
+    await _persistSecurity();
+    return true;
+  }
+
+  Future<void> updateSecurity({
     bool? screenshotProtectionEnabled,
     int? autoLockMinutes,
-  }) {
-    _biometricEnabled = biometricEnabled ?? _biometricEnabled;
+  }) async {
     _screenshotProtectionEnabled =
         screenshotProtectionEnabled ?? _screenshotProtectionEnabled;
     _autoLockMinutes = autoLockMinutes ?? _autoLockMinutes;
     notifyListeners();
+    await _dependencies.deviceSecurityService.setScreenshotProtection(
+      _screenshotProtectionEnabled,
+    );
+    await _persistSecurity();
   }
 
-  void toggleNotifications(bool value) {
+  Future<void> toggleNotifications(bool value) async {
     _notificationsEnabled = value;
     notifyListeners();
+    await _persistSecurity();
   }
 
-  void clearCache() {
+  Future<void> clearCache() async {
     _lastRefreshedAt = null;
+    _activitySyncBlocks = {};
     notifyListeners();
+    await _persistData();
+  }
+
+  Future<List<String>> recoveryWordsForWallet([String? walletId]) async {
+    final record = await _loadVaultRecord(walletId ?? currentWallet.id);
+    return record.mnemonic.split(RegExp(r'\s+'));
+  }
+
+  Future<int?> verificationWordIndexForWallet([String? walletId]) async {
+    final words = await recoveryWordsForWallet(walletId);
+    if (words.isEmpty) {
+      return null;
+    }
+    return words.length >= 11 ? 10 : words.length - 1;
+  }
+
+  Future<void> _persistData() {
+    return _dependencies.dataRepository.save(
+      WalletDataSnapshot(
+        wallets: List<WalletProfile>.unmodifiable(_wallets),
+        networks: List<ChainNetwork>.unmodifiable(_networks),
+        tokens: List<TokenAsset>.unmodifiable(_tokens),
+        activities: List<ActivityRecord>.unmodifiable(_activities),
+        activitySyncBlocks: Map<String, int>.unmodifiable(_activitySyncBlocks),
+        activeWalletId: currentWallet.id,
+        activeNetworkId: _activeNetworkId,
+        lastRefreshedAt: _lastRefreshedAt,
+      ),
+    );
+  }
+
+  Future<void> _persistSecurity() {
+    return _dependencies.securityRepository.writeSettings(
+      SecuritySettingsSnapshot(
+        hideBalances: _hideBalances,
+        biometricEnabled: _biometricEnabled,
+        screenshotProtectionEnabled: _screenshotProtectionEnabled,
+        notificationsEnabled: _notificationsEnabled,
+        autoLockMinutes: _autoLockMinutes,
+      ),
+    );
+  }
+
+  Future<void> _ensureWalletVaults() async {
+    for (var index = 0; index < _wallets.length; index++) {
+      final wallet = _wallets[index];
+      final existingRecord = await _dependencies.vaultRepository.readRecord(
+        wallet.id,
+      );
+      if (existingRecord != null) {
+        continue;
+      }
+
+      final vaultRecord = _dependencies.importGateway.derivePrimaryAccount(
+        walletId: wallet.id,
+        mnemonic: _developmentSeedMnemonic,
+      );
+      await _dependencies.vaultRepository.saveRecord(vaultRecord);
+      _wallets[index] = wallet.copyWith(
+        activeAccountId: '${wallet.id}-main',
+        accounts: [
+          WalletAccount(
+            id: '${wallet.id}-main',
+            name: 'Main Account',
+            address: vaultRecord.address,
+          ),
+        ],
+      );
+    }
+  }
+
+  Future<WalletVaultRecord> _loadVaultRecord(String walletId) async {
+    final record = await _dependencies.vaultRepository.readRecord(walletId);
+    if (record == null) {
+      throw const WalletImportException(
+        'The wallet vault record is missing. Re-import the wallet before signing transactions.',
+      );
+    }
+    return record;
+  }
+
+  void _mergeNetworkTokens(List<TokenAsset> refreshedTokens) {
+    final refreshedById = {
+      for (final token in refreshedTokens) token.id: token,
+    };
+    final merged = <TokenAsset>[];
+    final seen = <String>{};
+
+    for (final token in _tokens) {
+      if (token.networkId != _activeNetworkId) {
+        merged.add(token);
+        continue;
+      }
+
+      final refreshed = refreshedById[token.id];
+      if (refreshed != null) {
+        merged.add(
+          refreshed.copyWith(
+            fiatValue: token.fiatValue,
+            isHidden: token.isHidden,
+            isRisky: token.isRisky,
+            riskLabel: token.riskLabel,
+          ),
+        );
+        seen.add(token.id);
+      } else {
+        merged.add(token);
+      }
+    }
+
+    for (final token in refreshedTokens) {
+      if (!seen.contains(token.id)) {
+        merged.add(token);
+      }
+    }
+
+    _tokens = merged;
+  }
+
+  void _mergeNetworkActivities(List<ActivityRecord> refreshedActivities) {
+    final refreshedById = {
+      for (final activity in refreshedActivities) activity.id: activity,
+    };
+    final refreshedByHash = <String, ActivityRecord>{
+      for (final activity in refreshedActivities) activity.txHash: activity,
+    };
+    final merged = <ActivityRecord>[];
+    final seenIds = <String>{};
+
+    for (final activity in _activities) {
+      if (activity.networkId != _activeNetworkId) {
+        merged.add(activity);
+        continue;
+      }
+
+      final byId = refreshedById[activity.id];
+      if (byId != null) {
+        merged.add(byId);
+        seenIds.add(byId.id);
+        continue;
+      }
+
+      final byHash = refreshedByHash[activity.txHash];
+      if (byHash != null &&
+          byHash.type == activity.type &&
+          byHash.tokenSymbol == activity.tokenSymbol) {
+        merged.add(
+          activity.copyWith(
+            status: byHash.status,
+            title: byHash.title,
+            from: byHash.from,
+            to: byHash.to,
+            amount: byHash.amount,
+            gasFee: byHash.gasFee > 0 ? byHash.gasFee : activity.gasFee,
+            occurredAt: byHash.occurredAt,
+            riskNote: byHash.riskNote ?? activity.riskNote,
+          ),
+        );
+        seenIds.add(byHash.id);
+        continue;
+      }
+
+      merged.add(activity);
+    }
+
+    for (final activity in refreshedActivities) {
+      if (!seenIds.contains(activity.id) &&
+          !merged.any((item) => item.id == activity.id)) {
+        merged.add(activity);
+      }
+    }
+
+    merged.sort((left, right) => right.occurredAt.compareTo(left.occurredAt));
+    _activities = merged;
   }
 }

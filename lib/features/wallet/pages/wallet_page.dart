@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../shared/utils/wallet_formatters.dart';
-import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/chain_logo.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -405,25 +404,56 @@ class _AssetOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const panelColor = Color(0xFF123B39);
-    return AppCard(
-      padding: const EdgeInsets.all(18),
-      backgroundColor: panelColor,
-      borderColor: Colors.white.withValues(alpha: 0.06),
+    final amountText = hideBalances
+        ? '••••••'
+        : 'US${formatCurrency(totalAssetsUsd)}';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 20, 2, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (assetError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                assetError!,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: colorScheme.error,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            )
+          else
+            Text(
+              amountText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+                height: 0.98,
+                letterSpacing: 0,
+              ),
+            ),
+          const SizedBox(height: 18),
           Row(
             children: [
               Expanded(
                 child: Text(
-                  'Total Assets',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.72),
+                  isRefreshing
+                      ? 'Refreshing balances'
+                      : 'Across visible networks',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
               _AssetIconButton(
                 tooltip: hideBalances ? 'Show amount' : 'Hide amount',
                 onPressed: onToggleHidden,
@@ -431,50 +461,12 @@ class _AssetOverview extends StatelessWidget {
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               _AssetIconButton(
                 tooltip: 'Refresh assets',
                 onPressed: isRefreshing ? null : () => onRefresh(),
                 icon: Icons.refresh_rounded,
                 loading: isRefreshing,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (assetError != null)
-            Text(
-              assetError!,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: colorScheme.errorContainer,
-                fontWeight: FontWeight.w800,
-              ),
-            )
-          else
-            Text(
-              hideBalances ? '••••••' : formatCurrency(totalAssetsUsd),
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0,
-              ),
-            ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(
-                Icons.verified_user_outlined,
-                size: 15,
-                color: Colors.white.withValues(alpha: 0.66),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                isRefreshing
-                    ? 'Refreshing balances'
-                    : 'Across visible networks',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.66),
-                  fontWeight: FontWeight.w700,
-                ),
               ),
             ],
           ),
@@ -499,30 +491,33 @@ class _AssetIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(14),
         onTap: onPressed,
         child: Container(
-          width: 34,
-          height: 34,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            color: colorScheme.surfaceContainerHighest.withValues(
+              alpha: isDark ? 0.48 : 0.7,
+            ),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Center(
             child: loading
-                ? const SizedBox(
-                    width: 15,
-                    height: 15,
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+                      strokeWidth: 2.2,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   )
-                : Icon(icon, color: Colors.white, size: 19),
+                : Icon(icon, color: colorScheme.onSurfaceVariant, size: 24),
           ),
         ),
       ),
@@ -535,9 +530,8 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      showShadow: false,
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, bottom: 2),
       child: Row(
         children: [
           Expanded(
@@ -549,7 +543,7 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
           ),
-          const _ActionDivider(),
+          const SizedBox(width: 8),
           Expanded(
             child: _QuickActionButton(
               icon: Icons.south_west_rounded,
@@ -559,7 +553,7 @@ class _QuickActions extends StatelessWidget {
               ),
             ),
           ),
-          const _ActionDivider(),
+          const SizedBox(width: 8),
           Expanded(
             child: _QuickActionButton(
               icon: Icons.qr_code_scanner_rounded,
@@ -569,23 +563,20 @@ class _QuickActions extends StatelessWidget {
               ).push(MaterialPageRoute<void>(builder: (_) => const ScanPage())),
             ),
           ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _QuickActionButton(
+              icon: Icons.travel_explore_rounded,
+              label: 'DAPP',
+              onTap: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('DAPP 入口即将开放')));
+              },
+            ),
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _ActionDivider extends StatelessWidget {
-  const _ActionDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 36,
-      color: Theme.of(
-        context,
-      ).colorScheme.outlineVariant.withValues(alpha: 0.55),
     );
   }
 }
@@ -604,31 +595,36 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          height: 84,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(
+              alpha: isDark ? 0.42 : 0.56,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: colorScheme.onSurfaceVariant, size: 28),
+              const SizedBox(height: 9),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-              child: Icon(icon, color: colorScheme.primary, size: 20),
-            ),
-            const SizedBox(height: 7),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

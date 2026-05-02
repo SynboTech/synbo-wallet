@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/app_card.dart';
-import '../models/wallet_models.dart';
 import '../providers/wallet_state_scope.dart';
 import 'transaction_confirmation_page.dart';
 
@@ -127,7 +126,7 @@ class _SendFlowPageState extends State<SendFlowPage> {
     );
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
@@ -136,21 +135,27 @@ class _SendFlowPageState extends State<SendFlowPage> {
     if (token == null) {
       return;
     }
-    final network = state.networkById(token.networkId);
-    final transfer = PendingTransfer(
-      from: state.currentAccount.address,
-      to: _recipientController.text.trim(),
-      network: network,
-      token: token,
-      amount: double.parse(_amountController.text),
-      gasFee: token.symbol == network.nativeSymbol ? 0.0031 : 0.0018,
-      riskWarning:
-          'Verify the recipient, network, amount, token, gas fee, and total before confirming. Transfers cannot be reversed.',
-    );
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => TransactionConfirmationPage(transfer: transfer),
-      ),
-    );
+    try {
+      final transfer = await state.prepareTransfer(
+        token: token,
+        toAddress: _recipientController.text.trim(),
+        amountText: _amountController.text.trim(),
+      );
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => TransactionConfirmationPage(transfer: transfer),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
   }
 }

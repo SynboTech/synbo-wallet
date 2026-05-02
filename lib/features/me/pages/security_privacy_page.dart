@@ -34,8 +34,15 @@ class SecurityPrivacyPage extends StatelessWidget {
                   secondary: const Icon(Icons.fingerprint_rounded),
                   title: const Text('Face ID / 指纹'),
                   value: state.biometricEnabled,
-                  onChanged: (value) =>
-                      state.updateSecurity(biometricEnabled: value),
+                  onChanged: (value) async {
+                    final enabled = await state.setBiometricEnabled(value);
+                    if (!context.mounted || enabled || !value) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('当前设备不支持或未通过生物识别验证')),
+                    );
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -80,6 +87,18 @@ class SecurityPrivacyPage extends StatelessWidget {
             SettingsGroup(
               title: '缓存',
               children: [
+                SettingsItem(
+                  icon: Icons.lock_outline_rounded,
+                  title: '立即锁定',
+                  subtitle: '返回解锁页并保护当前会话',
+                  onTap: () {
+                    state.lock();
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('钱包已锁定')));
+                  },
+                ),
+                const Divider(height: 1),
                 SettingsItem(
                   icon: Icons.cleaning_services_outlined,
                   title: '清除缓存',

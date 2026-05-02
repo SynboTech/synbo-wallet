@@ -1,23 +1,45 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../app/wallet_dependencies.dart';
 import 'wallet_state.dart';
 
 class WalletStateProvider extends StatefulWidget {
-  const WalletStateProvider({super.key, required this.child});
+  const WalletStateProvider({
+    super.key,
+    required this.child,
+    required this.dependencies,
+  });
 
   final Widget child;
+  final WalletAppDependencies dependencies;
 
   @override
   State<WalletStateProvider> createState() => _WalletStateProviderState();
 }
 
-class _WalletStateProviderState extends State<WalletStateProvider> {
-  late final WalletAppState _state = WalletAppState();
+class _WalletStateProviderState extends State<WalletStateProvider>
+    with WidgetsBindingObserver {
+  late final WalletAppState _state = WalletAppState(
+    dependencies: widget.dependencies,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _state.initialize();
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _state.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _state.onLifecycleChanged(state);
   }
 
   @override

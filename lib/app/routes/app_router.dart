@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/home/pages/capital_page.dart';
 import '../../features/me/pages/authorization_management_page.dart';
 import '../../features/me/pages/help_center_page.dart';
 import '../../features/me/pages/invite_page.dart';
@@ -9,6 +10,7 @@ import '../../features/me/pages/security_privacy_page.dart';
 import '../../features/me/pages/wallet_management_page.dart';
 
 abstract final class AppRouteNames {
+  static const capital = '/capital';
   static const walletManagement = '/me/wallets';
   static const networkManagement = '/me/networks';
   static const securityPrivacy = '/me/security';
@@ -21,6 +23,7 @@ abstract final class AppRouteNames {
 class AppRouter {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     return switch (settings.name) {
+      AppRouteNames.capital => _route(const CapitalPage()),
       AppRouteNames.walletManagement => _route(const WalletManagementPage()),
       AppRouteNames.networkManagement => _route(const NetworkManagementPage()),
       AppRouteNames.securityPrivacy => _route(const SecurityPrivacyPage()),

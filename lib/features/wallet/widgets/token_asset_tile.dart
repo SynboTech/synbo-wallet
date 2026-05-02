@@ -94,17 +94,6 @@ class TokenAssetTile extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        '·',
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                      Text(
-                        network.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Color(network.colorValue),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
                       if (token.isRisky) ...[
                         Text(
                           '·',

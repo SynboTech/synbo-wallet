@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../shared/widgets/app_card.dart';
 
 class MnemonicVerifyPage extends StatefulWidget {
-  const MnemonicVerifyPage({super.key});
+  const MnemonicVerifyPage({super.key, required this.words});
+
+  final List<String> words;
 
   @override
   State<MnemonicVerifyPage> createState() => _MnemonicVerifyPageState();
@@ -11,6 +13,9 @@ class MnemonicVerifyPage extends StatefulWidget {
 
 class _MnemonicVerifyPageState extends State<MnemonicVerifyPage> {
   final _controller = TextEditingController();
+
+  int get _verificationIndex =>
+      widget.words.length >= 11 ? 10 : widget.words.length - 1;
 
   @override
   void dispose() {
@@ -20,6 +25,7 @@ class _MnemonicVerifyPageState extends State<MnemonicVerifyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final labelIndex = _verificationIndex + 1;
     return Scaffold(
       appBar: AppBar(title: const Text('助记词验证')),
       body: SafeArea(
@@ -31,7 +37,7 @@ class _MnemonicVerifyPageState extends State<MnemonicVerifyPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Word 11',
+                    'Word $labelIndex',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -62,7 +68,10 @@ class _MnemonicVerifyPageState extends State<MnemonicVerifyPage> {
   }
 
   void _verify() {
-    final ok = _controller.text.trim().toLowerCase() == 'ocean';
+    final ok =
+        widget.words.isNotEmpty &&
+        _controller.text.trim().toLowerCase() ==
+            widget.words[_verificationIndex].toLowerCase();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(ok ? 'Backup verified' : 'Incorrect word')),
     );
