@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/home/pages/capital_page.dart';
+import '../../features/home/pages/club_page.dart';
 import '../../features/home/models/square_models.dart';
 import '../../features/home/pages/portfolio_detail_page.dart';
 import '../../features/home/pages/square_post_detail_page.dart';
@@ -14,6 +15,7 @@ import '../../features/me/pages/wallet_management_page.dart';
 
 abstract final class AppRouteNames {
   static const capital = '/capital';
+  static const club = '/club';
   static const portfolioDetail = '/portfolio/detail';
   static const squarePostDetail = '/square/post';
   static const walletManagement = '/me/wallets';
@@ -29,6 +31,7 @@ class AppRouter {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     return switch (settings.name) {
       AppRouteNames.capital => _route(const CapitalPage()),
+      AppRouteNames.club => _route(const ClubPage()),
       AppRouteNames.portfolioDetail => _route(
         _buildPortfolioDetailPage(settings.arguments as Map<String, dynamic>),
       ),

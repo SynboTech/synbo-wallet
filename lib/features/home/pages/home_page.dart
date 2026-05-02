@@ -1072,6 +1072,10 @@ void _showEcosystemPage(BuildContext context, String ecosystem) {
     Navigator.of(context).pushNamed(AppRouteNames.capital);
     return;
   }
+  if (ecosystem == 'Club') {
+    Navigator.of(context).pushNamed(AppRouteNames.club);
+    return;
+  }
   ScaffoldMessenger.of(
     context,
   ).showSnackBar(SnackBar(content: Text(ecosystem)));
