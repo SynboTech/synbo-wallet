@@ -47,7 +47,7 @@ class ActivityRecordTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0,
                               ),
                         ),
@@ -73,7 +73,7 @@ class ActivityRecordTile extends StatelessWidget {
                         _statusLabel(activity.status),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: statusColor,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
@@ -84,7 +84,7 @@ class ActivityRecordTile extends StatelessWidget {
                         network.name,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Color(network.colorValue),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
@@ -95,7 +95,7 @@ class ActivityRecordTile extends StatelessWidget {
                         formatDateTime(activity.occurredAt),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
@@ -113,7 +113,7 @@ class ActivityRecordTile extends StatelessWidget {
                     color: activity.status == ActivityStatus.failed
                         ? colorScheme.onSurfaceVariant
                         : colorScheme.onSurface,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 0,
                   ),
                 ),
@@ -122,7 +122,7 @@ class ActivityRecordTile extends StatelessWidget {
                   _secondaryText(activity),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],

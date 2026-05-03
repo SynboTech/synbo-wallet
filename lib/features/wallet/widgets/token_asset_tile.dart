@@ -57,7 +57,7 @@ class TokenAssetTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0,
                               ),
                         ),
@@ -67,7 +67,7 @@ class TokenAssetTile extends StatelessWidget {
                         token.symbol,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0,
                         ),
                       ),
@@ -91,7 +91,7 @@ class TokenAssetTile extends StatelessWidget {
                         hideBalances ? '••••' : formatCurrency(unitPrice),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       if (token.isRisky) ...[
@@ -104,7 +104,7 @@ class TokenAssetTile extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: riskColor,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w600,
                               ),
                         ),
                       ],
@@ -120,7 +120,7 @@ class TokenAssetTile extends StatelessWidget {
                 Text(
                   hideBalances ? '••••' : formatCurrency(token.fiatValue),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 0,
                   ),
                 ),
@@ -131,7 +131,7 @@ class TokenAssetTile extends StatelessWidget {
                       : '${formatTokenAmount(token.balance)} ${token.symbol}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],

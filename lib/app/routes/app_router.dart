@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../features/home/pages/capital_page.dart';
+import '../../features/home/pages/author_space_page.dart';
 import '../../features/home/pages/club_page.dart';
 import '../../features/home/models/square_models.dart';
 import '../../features/home/pages/portfolio_detail_page.dart';
+import '../../features/home/pages/portfolio_list_page.dart';
 import '../../features/home/pages/square_post_detail_page.dart';
 import '../../features/me/pages/authorization_management_page.dart';
 import '../../features/me/pages/help_center_page.dart';
@@ -16,8 +18,10 @@ import '../../features/me/pages/wallet_management_page.dart';
 abstract final class AppRouteNames {
   static const capital = '/capital';
   static const club = '/club';
+  static const portfolioList = '/portfolio/list';
   static const portfolioDetail = '/portfolio/detail';
   static const squarePostDetail = '/square/post';
+  static const authorSpace = '/square/author';
   static const walletManagement = '/me/wallets';
   static const networkManagement = '/me/networks';
   static const securityPrivacy = '/me/security';
@@ -32,11 +36,17 @@ class AppRouter {
     return switch (settings.name) {
       AppRouteNames.capital => _route(const CapitalPage()),
       AppRouteNames.club => _route(const ClubPage()),
+      AppRouteNames.portfolioList => _route(
+        PortfolioListPage(initialTabIndex: settings.arguments as int? ?? 0),
+      ),
       AppRouteNames.portfolioDetail => _route(
         _buildPortfolioDetailPage(settings.arguments as Map<String, dynamic>),
       ),
       AppRouteNames.squarePostDetail => _route(
         SquarePostDetailPage(post: settings.arguments as SquarePost),
+      ),
+      AppRouteNames.authorSpace => _route(
+        AuthorSpacePage(author: settings.arguments as SquareAuthorProfile),
       ),
       AppRouteNames.walletManagement => _route(const WalletManagementPage()),
       AppRouteNames.networkManagement => _route(const NetworkManagementPage()),

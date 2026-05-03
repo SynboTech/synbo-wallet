@@ -156,6 +156,7 @@ class _HomePageState extends State<HomePage> {
                     isLast: index == _squarePosts.length - 1,
                     onLike: () => _toggleLike(index),
                     onOpen: () => _openSquarePost(_squarePosts[index]),
+                    onAuthorOpen: () => _openAuthorSpace(_squarePosts[index]),
                     onComment: () => _showCommentSheet(_squarePosts[index]),
                     onShare: () => _showShareSheet(_squarePosts[index]),
                   ),
@@ -377,8 +378,8 @@ class _HomePageState extends State<HomePage> {
                                   : colorScheme.onSurfaceVariant,
                               fontSize: 16,
                               fontWeight: isActive
-                                  ? FontWeight.w900
-                                  : FontWeight.w700,
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -400,7 +401,7 @@ class _HomePageState extends State<HomePage> {
               const Spacer(),
               _TextButton(
                 label: 'More',
-                onTap: () => _showMorePortfolio(context),
+                onTap: () => _showMorePortfolio(context, _portfolioTabIndex),
               ),
             ],
           ),
@@ -438,7 +439,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           const Text(
             'Square',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           Row(
             children: [
@@ -471,6 +472,13 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(
       context,
     ).pushNamed(AppRouteNames.squarePostDetail, arguments: post);
+  }
+
+  void _openAuthorSpace(SquarePost post) {
+    Navigator.of(context).pushNamed(
+      AppRouteNames.authorSpace,
+      arguments: SquareAuthorProfile.fromPost(post),
+    );
   }
 
   void _showCommentSheet(SquarePost post) {
@@ -516,10 +524,11 @@ class _EcosystemTile extends StatelessWidget {
           height: 92,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLowest.withValues(
-              alpha: isDark ? 0.38 : 0.58,
-            ),
+            color: isDark ? const Color(0xFF171B20) : const Color(0xFFF1F3F5),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDark ? const Color(0xFF252B32) : const Color(0xFFE4E8EC),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -549,7 +558,7 @@ class _EcosystemTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -657,7 +666,7 @@ class _PortfolioCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 17,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -678,7 +687,7 @@ class _PortfolioCard extends StatelessWidget {
                             style: TextStyle(
                               color: colorScheme.onSurfaceVariant,
                               fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -696,7 +705,7 @@ class _PortfolioCard extends StatelessWidget {
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
@@ -705,7 +714,7 @@ class _PortfolioCard extends StatelessWidget {
                         style: TextStyle(
                           color: colorScheme.onSurfaceVariant,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       Text(
@@ -713,7 +722,7 @@ class _PortfolioCard extends StatelessWidget {
                         style: TextStyle(
                           color: changeColor,
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -730,7 +739,7 @@ class _PortfolioCard extends StatelessWidget {
                   item.totalValue,
                   style: const TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -739,7 +748,7 @@ class _PortfolioCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorScheme.onSurfaceVariant,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -810,7 +819,7 @@ class _PredictionMarketCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 17,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -821,7 +830,7 @@ class _PredictionMarketCard extends StatelessWidget {
                   style: TextStyle(
                     color: colorScheme.onSurfaceVariant,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -836,7 +845,7 @@ class _PredictionMarketCard extends StatelessWidget {
                 item.probability,
                 style: const TextStyle(
                   fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 4),
@@ -845,7 +854,7 @@ class _PredictionMarketCard extends StatelessWidget {
                 style: TextStyle(
                   color: changeColor,
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -862,6 +871,7 @@ class _SquarePostCard extends StatelessWidget {
     required this.isLast,
     required this.onLike,
     required this.onOpen,
+    required this.onAuthorOpen,
     required this.onComment,
     required this.onShare,
   });
@@ -869,6 +879,7 @@ class _SquarePostCard extends StatelessWidget {
   final bool isLast;
   final VoidCallback onLike;
   final VoidCallback onOpen;
+  final VoidCallback onAuthorOpen;
   final VoidCallback onComment;
   final VoidCallback onShare;
 
@@ -893,20 +904,24 @@ class _SquarePostCard extends StatelessWidget {
         onTap: onOpen,
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: post.color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  post.avatar,
-                  style: TextStyle(
-                    color: post.color,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onAuthorOpen,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: post.color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    post.avatar,
+                    style: TextStyle(
+                      color: post.color,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -920,13 +935,17 @@ class _SquarePostCard extends StatelessWidget {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          post.author,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: onAuthorOpen,
+                          child: Text(
+                            post.author,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -1018,7 +1037,7 @@ class _ActionButton extends StatelessWidget {
             style: TextStyle(
               color: activeColor,
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -1054,7 +1073,7 @@ class _TextButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
             fontSize: 12,
             color: isActive
                 ? colorScheme.primary
@@ -1081,8 +1100,8 @@ void _showEcosystemPage(BuildContext context, String ecosystem) {
   ).showSnackBar(SnackBar(content: Text(ecosystem)));
 }
 
-void _showMorePortfolio(BuildContext context) {
-  ScaffoldMessenger.of(
+void _showMorePortfolio(BuildContext context, int initialTabIndex) {
+  Navigator.of(
     context,
-  ).showSnackBar(const SnackBar(content: Text('View all portfolio items')));
+  ).pushNamed(AppRouteNames.portfolioList, arguments: initialTabIndex);
 }

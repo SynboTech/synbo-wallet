@@ -19,21 +19,12 @@ class _MePageState extends State<MePage> {
   bool _showBanner = true;
 
   final _banners = [
-    _AdBannerItem(
-      title: 'Earn Rewards',
-      subtitle: 'Join our loyalty program',
-      gradient: [const Color(0xFF5B6EE1), const Color(0xFF3D4DB8)],
-    ),
+    _AdBannerItem(title: 'Earn Rewards', subtitle: 'Join our loyalty program'),
     _AdBannerItem(
       title: 'New Features',
       subtitle: 'Explore the latest updates',
-      gradient: [const Color(0xFF7B3FE4), const Color(0xFF5E2FB8)],
     ),
-    _AdBannerItem(
-      title: 'Stay Secure',
-      subtitle: 'Enable biometric login',
-      gradient: [const Color(0xFF00A86B), const Color(0xFF007A4D)],
-    ),
+    _AdBannerItem(title: 'Stay Secure', subtitle: 'Enable biometric login'),
   ];
 
   @override
@@ -55,7 +46,7 @@ class _MePageState extends State<MePage> {
             '我的',
             style: Theme.of(
               context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
           _UserProfileCard(
@@ -144,7 +135,7 @@ class _MePageState extends State<MePage> {
   Widget _buildAdBanner(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final banner = _banners[_currentBannerIndex];
-    
+
     return Column(
       children: [
         GestureDetector(
@@ -153,26 +144,28 @@ class _MePageState extends State<MePage> {
               if (details.primaryVelocity! < 0) {
                 // Swipe left - next
                 setState(() {
-                  _currentBannerIndex = (_currentBannerIndex + 1) % _banners.length;
+                  _currentBannerIndex =
+                      (_currentBannerIndex + 1) % _banners.length;
                 });
               } else if (details.primaryVelocity! > 0) {
                 // Swipe right - previous
                 setState(() {
-                  _currentBannerIndex = (_currentBannerIndex - 1 + _banners.length) % _banners.length;
+                  _currentBannerIndex =
+                      (_currentBannerIndex - 1 + _banners.length) %
+                      _banners.length;
                 });
               }
             }
           },
           onTap: () => setState(() => _showBanner = false),
           child: Container(
-            height: 88,
+            height: 82,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: banner.gradient,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.28),
               ),
-              borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             child: Row(
@@ -184,17 +177,17 @@ class _MePageState extends State<MePage> {
                     children: [
                       Text(
                         banner.title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
                           fontSize: 15,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         banner.subtitle,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 12,
                         ),
                       ),
@@ -205,12 +198,12 @@ class _MePageState extends State<MePage> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: colorScheme.primary.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.star_rounded,
-                    color: Colors.white,
+                    color: colorScheme.primary,
                     size: 18,
                   ),
                 ),
@@ -233,7 +226,7 @@ class _MePageState extends State<MePage> {
                   borderRadius: BorderRadius.circular(3),
                   color: index == _currentBannerIndex
                       ? colorScheme.primary
-                      : Colors.grey[300],
+                      : colorScheme.outlineVariant,
                 ),
               ),
             ),
@@ -256,12 +249,7 @@ class _MePageState extends State<MePage> {
 class _AdBannerItem {
   final String title;
   final String subtitle;
-  final List<Color> gradient;
-  _AdBannerItem({
-    required this.title,
-    required this.subtitle,
-    required this.gradient,
-  });
+  _AdBannerItem({required this.title, required this.subtitle});
 }
 
 class _UserProfileCard extends StatelessWidget {
@@ -303,7 +291,7 @@ class _UserProfileCard extends StatelessWidget {
                 Text(
                   account.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -348,7 +336,7 @@ class _SettingsSection extends StatelessWidget {
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -409,7 +397,7 @@ class _SettingsRow extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -420,7 +408,7 @@ class _SettingsRow extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
@@ -433,7 +421,7 @@ class _SettingsRow extends StatelessWidget {
                   trailingLabel!,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

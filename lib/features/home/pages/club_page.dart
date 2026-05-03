@@ -12,8 +12,17 @@ class _ClubPageState extends State<ClubPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _tabIndex = 0;
+  late _ClubItem _selectedClub;
 
   final _clubs = [
+    _ClubItem(
+      name: '国库基金CLUB',
+      avatar: '🏦',
+      lastMessage: 'Treasury fund update is ready',
+      timestamp: '18:08',
+      unreadCount: 0,
+      isPublic: true,
+    ),
     _ClubItem(
       name: '天空飘来几个字-刀乐',
       avatar: '👥',
@@ -72,6 +81,7 @@ class _ClubPageState extends State<ClubPage>
   @override
   void initState() {
     super.initState();
+    _selectedClub = _clubs.first;
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() => _tabIndex = _tabController.index);
@@ -94,9 +104,11 @@ class _ClubPageState extends State<ClubPage>
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
-        title: const Text(
-          '聊天',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+        titleSpacing: 12,
+        title: _ClubTitleSelector(
+          selectedClub: _selectedClub,
+          clubs: _clubs,
+          onSelected: (club) => setState(() => _selectedClub = club),
         ),
         actions: [
           IconButton(
@@ -246,10 +258,11 @@ class _ClubPageState extends State<ClubPage>
   }
 
   Widget _buildClubItem(_ClubItem club, ColorScheme colorScheme, bool isDark) {
+    final selected = club.name == _selectedClub.name;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: () => setState(() => _selectedClub = club),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
@@ -260,8 +273,13 @@ class _ClubPageState extends State<ClubPage>
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
+                      color: selected
+                          ? colorScheme.primary.withValues(alpha: 0.12)
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
+                      border: selected
+                          ? Border.all(color: colorScheme.primary, width: 1.4)
+                          : null,
                     ),
                     child: Center(
                       child: Text(
@@ -293,6 +311,34 @@ class _ClubPageState extends State<ClubPage>
                         ),
                       ),
                     ),
+                  if (!club.isPublic)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: colorScheme.surface,
+                            width: 2,
+                          ),
+                        ),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF6F7781),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.lock_rounded,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(width: 12),
@@ -315,6 +361,14 @@ class _ClubPageState extends State<ClubPage>
                             ),
                           ),
                         ),
+                        if (selected) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 16,
+                            color: colorScheme.primary,
+                          ),
+                        ],
                         Text(
                           club.timestamp,
                           style: TextStyle(
@@ -429,6 +483,83 @@ class _ClubPageState extends State<ClubPage>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ClubTitleSelector extends StatelessWidget {
+  const _ClubTitleSelector({
+    required this.selectedClub,
+    required this.clubs,
+    required this.onSelected,
+  });
+
+  final _ClubItem selectedClub;
+  final List<_ClubItem> clubs;
+  final ValueChanged<_ClubItem> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return PopupMenuButton<_ClubItem>(
+      tooltip: 'Switch club',
+      initialValue: selectedClub,
+      onSelected: onSelected,
+      offset: const Offset(0, 42),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      itemBuilder: (context) => clubs
+          .map(
+            (club) => PopupMenuItem<_ClubItem>(
+              value: club,
+              child: Row(
+                children: [
+                  Text(club.avatar, style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      club.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: club.name == selectedClub.name
+                            ? FontWeight.w900
+                            : FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (club.name == selectedClub.name)
+                    Icon(
+                      Icons.check_rounded,
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 230),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                selectedClub.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.keyboard_arrow_down_rounded, size: 24),
+          ],
         ),
       ),
     );

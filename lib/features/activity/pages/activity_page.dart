@@ -29,7 +29,7 @@ class _ActivityPageState extends State<ActivityPage> {
           Text(
             '活动',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0,
             ),
           ),
@@ -182,7 +182,7 @@ class _ActivitySectionTab extends StatelessWidget {
                 color: selected
                     ? colorScheme.onSurface
                     : colorScheme.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 letterSpacing: 0,
               ),
             ),

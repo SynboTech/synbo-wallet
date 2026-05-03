@@ -27,7 +27,7 @@ class AppTheme {
       textTheme: Typography.material2021().black
           .copyWith(
             displaySmall: const TextStyle(fontSize: 34, height: 1.05),
-            headlineSmall: const TextStyle(fontSize: 24, height: 1.16),
+            headlineSmall: const TextStyle(fontSize: 23, height: 1.16),
             titleLarge: const TextStyle(fontSize: 20, height: 1.18),
             titleMedium: const TextStyle(fontSize: 16, height: 1.25),
             titleSmall: const TextStyle(fontSize: 14, height: 1.25),
@@ -53,7 +53,7 @@ class AppTheme {
         titleTextStyle: TextStyle(
           color: colorScheme.onSurface,
           fontSize: 18,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -67,8 +67,8 @@ class AppTheme {
           (states) => TextStyle(
             fontSize: 12,
             fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w800
-                : FontWeight.w600,
+                ? FontWeight.w700
+                : FontWeight.w500,
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(

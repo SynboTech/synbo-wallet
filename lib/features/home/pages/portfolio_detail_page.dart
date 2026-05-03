@@ -96,16 +96,16 @@ class _PairHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 14, 8),
+      padding: const EdgeInsets.fromLTRB(10, 10, 12, 6),
       child: Row(
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 31),
+            icon: const Icon(Icons.arrow_back_rounded, size: 27),
             visualDensity: VisualDensity.compact,
           ),
-          Container(width: 1, height: 24, color: const Color(0xFFECEFF2)),
-          const SizedBox(width: 12),
+          Container(width: 1, height: 22, color: const Color(0xFFECEFF2)),
+          const SizedBox(width: 10),
           Expanded(
             child: Row(
               children: [
@@ -115,8 +115,8 @@ class _PairHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 0,
                     ),
                   ),
@@ -128,12 +128,12 @@ class _PairHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.star_rounded, size: 34),
+            icon: const Icon(Icons.star_rounded, size: 29),
             visualDensity: VisualDensity.compact,
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.open_in_full_rounded, size: 25),
+            icon: const Icon(Icons.open_in_full_rounded, size: 22),
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -152,8 +152,8 @@ class _TopTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = ['图表', '币种信息', '融资数据', '情报'];
     return Container(
-      height: 58,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      height: 50,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: const BoxDecoration(
         color: Color(0xFFF7FCFC),
         border: Border(bottom: BorderSide(color: Color(0xFFEFF2F4))),
@@ -163,14 +163,14 @@ class _TopTabs extends StatelessWidget {
           final active = index == selectedIndex;
           return Padding(
             padding: EdgeInsets.only(
-              right: index == labels.length - 1 ? 0 : 30,
+              right: index == labels.length - 1 ? 0 : 24,
             ),
             child: IntrinsicWidth(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => onChanged(index),
                 child: SizedBox(
-                  height: 58,
+                  height: 50,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -182,17 +182,17 @@ class _TopTabs extends StatelessWidget {
                           color: active
                               ? const Color(0xFF1E2226)
                               : _PortfolioDetailPageMuted.color,
-                          fontSize: 17,
+                          fontSize: 15,
                           fontWeight: active
-                              ? FontWeight.w900
-                              : FontWeight.w700,
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 7),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
-                        width: active ? 36 : 0,
-                        height: 3,
+                        width: active ? 26 : 0,
+                        height: 2,
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E2226),
                           borderRadius: BorderRadius.circular(99),
@@ -249,10 +249,11 @@ class _TabContent extends StatelessWidget {
           ),
           const _TimeframeBar(),
           const SizedBox(
-            height: 470,
+            height: 405,
             width: double.infinity,
             child: _MarketChart(),
           ),
+          _TradeRecordList(symbol: symbol),
         ],
       ),
       1 => _PlaceholderTabPage(
@@ -303,35 +304,35 @@ class _PlaceholderTabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 28, 22, 32),
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
             style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             subtitle,
             style: const TextStyle(
               color: _PortfolioDetailPageMuted.color,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 20),
           Container(height: 1, color: const Color(0xFFEFF2F4)),
           for (final row in rows)
             _PlaceholderInfoRow(label: row.$1, value: row.$2),
-          const SizedBox(height: 28),
+          const SizedBox(height: 22),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             decoration: BoxDecoration(
               color: const Color(0xFFF7F9FA),
               borderRadius: BorderRadius.circular(8),
@@ -347,15 +348,15 @@ class _PlaceholderTabPage extends StatelessWidget {
                 SizedBox(height: 14),
                 Text(
                   '内容占位',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: 8),
                 Text(
                   '后续接入真实数据后，这里会替换为对应模块的完整内容。',
                   style: TextStyle(
                     color: _PortfolioDetailPageMuted.color,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
                     height: 1.35,
                   ),
                 ),
@@ -388,8 +389,8 @@ class _PlaceholderInfoRow extends StatelessWidget {
               label,
               style: const TextStyle(
                 color: _PortfolioDetailPageMuted.color,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
@@ -398,7 +399,7 @@ class _PlaceholderInfoRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -427,7 +428,7 @@ class _MarketSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -438,34 +439,34 @@ class _MarketSummary extends StatelessWidget {
                 Text(
                   price,
                   style: const TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
                     height: 1,
                     letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: 13),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     const Text(
                       '≈ 0.14 USD',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Text(
                       change,
                       style: TextStyle(
                         color: changeColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   children: [
@@ -477,7 +478,7 @@ class _MarketSummary extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 14),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -510,8 +511,8 @@ class _Tag extends StatelessWidget {
         label,
         style: const TextStyle(
           color: Color(0xFF818991),
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -527,7 +528,7 @@ class _StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 11),
+      padding: const EdgeInsets.only(bottom: 9),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -535,14 +536,14 @@ class _StatRow extends StatelessWidget {
             label,
             style: const TextStyle(
               color: _PortfolioDetailPageMuted.color,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 12),
           Text(
             value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -557,7 +558,7 @@ class _TimeframeBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = ['5分', '15分', '1时', '4时', '1日', '周K', '更多'];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(22, 0, 18, 14),
+      padding: const EdgeInsets.fromLTRB(18, 0, 16, 12),
       child: Row(
         children: [
           for (final label in labels) ...[
@@ -567,21 +568,21 @@ class _TimeframeBar extends StatelessWidget {
                 color: label == '1日'
                     ? const Color(0xFF1E2226)
                     : _PortfolioDetailPageMuted.color,
-                fontSize: 17,
-                fontWeight: label == '1日' ? FontWeight.w900 : FontWeight.w700,
+                fontSize: 14,
+                fontWeight: label == '1日' ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
             const Spacer(),
           ],
           const Icon(
             Icons.smart_toy_outlined,
-            size: 25,
+            size: 21,
             color: Color(0xFF65717C),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 14),
           const Icon(
             Icons.settings_outlined,
-            size: 26,
+            size: 22,
             color: Color(0xFF1E2226),
           ),
         ],
@@ -616,6 +617,204 @@ class _MarketChart extends StatelessWidget {
   }
 }
 
+class _TradeRecordList extends StatelessWidget {
+  const _TradeRecordList({required this.symbol});
+
+  final String symbol;
+
+  static const _records = [
+    _TradeRecord('14:26:18', 'Buy', '0.13950', '12,480', '1,740.96'),
+    _TradeRecord('14:25:47', 'Sell', '0.13942', '8,200', '1,143.24'),
+    _TradeRecord('14:25:11', 'Buy', '0.13958', '4,930', '688.13'),
+    _TradeRecord('14:24:36', 'Buy', '0.13961', '16,000', '2,233.76'),
+    _TradeRecord('14:23:52', 'Sell', '0.13937', '6,750', '940.75'),
+    _TradeRecord('14:22:44', 'Buy', '0.13948', '21,300', '2,971.92'),
+    _TradeRecord('14:21:39', 'Sell', '0.13932', '9,880', '1,376.48'),
+    _TradeRecord('14:20:05', 'Buy', '0.13955', '7,420', '1,035.46'),
+    _TradeRecord('14:18:58', 'Buy', '0.13963', '13,600', '1,898.97'),
+    _TradeRecord('14:17:46', 'Sell', '0.13928', '5,100', '710.33'),
+    _TradeRecord('14:16:23', 'Buy', '0.13944', '18,250', '2,545.78'),
+    _TradeRecord('14:15:09', 'Sell', '0.13920', '10,000', '1,392.00'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                '交易记录',
+                style: TextStyle(
+                  color: Color(0xFF1E2226),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '$symbol / USDT',
+                style: const TextStyle(
+                  color: _PortfolioDetailPageMuted.color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const _TradeRecordHeader(),
+          const SizedBox(height: 4),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F9FA),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFEFF2F4)),
+            ),
+            child: Column(
+              children: List.generate(_records.length, (index) {
+                final record = _records[index];
+                return _TradeRecordRow(
+                  record: record,
+                  showDivider: index != _records.length - 1,
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TradeRecordHeader extends StatelessWidget {
+  const _TradeRecordHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Expanded(flex: 18, child: _TradeRecordLabel('时间')),
+          Expanded(flex: 14, child: _TradeRecordLabel('方向')),
+          Expanded(flex: 22, child: _TradeRecordLabel('价格')),
+          Expanded(flex: 22, child: _TradeRecordLabel('数量')),
+          Expanded(
+            flex: 24,
+            child: _TradeRecordLabel('金额', align: TextAlign.right),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TradeRecordLabel extends StatelessWidget {
+  const _TradeRecordLabel(this.text, {this.align = TextAlign.left});
+
+  final String text;
+  final TextAlign align;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: align,
+      style: const TextStyle(
+        color: _PortfolioDetailPageMuted.color,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+}
+
+class _TradeRecordRow extends StatelessWidget {
+  const _TradeRecordRow({required this.record, required this.showDivider});
+
+  final _TradeRecord record;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBuy = record.side == 'Buy';
+    final sideColor = isBuy
+        ? PortfolioDetailPage._green
+        : PortfolioDetailPage._red;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        border: showDivider
+            ? const Border(bottom: BorderSide(color: Color(0xFFEFF2F4)))
+            : null,
+      ),
+      child: Row(
+        children: [
+          Expanded(flex: 18, child: _TradeRecordCell(record.time)),
+          Expanded(
+            flex: 14,
+            child: Text(
+              record.side,
+              style: TextStyle(
+                color: sideColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 22,
+            child: _TradeRecordCell(record.price, color: sideColor),
+          ),
+          Expanded(flex: 22, child: _TradeRecordCell(record.amount)),
+          Expanded(
+            flex: 24,
+            child: _TradeRecordCell(record.total, align: TextAlign.right),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TradeRecordCell extends StatelessWidget {
+  const _TradeRecordCell(
+    this.text, {
+    this.color = const Color(0xFF505963),
+    this.align = TextAlign.left,
+  });
+
+  final String text;
+  final Color color;
+  final TextAlign align;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: align,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+    );
+  }
+}
+
+class _TradeRecord {
+  const _TradeRecord(this.time, this.side, this.price, this.amount, this.total);
+
+  final String time;
+  final String side;
+  final String price;
+  final String amount;
+  final String total;
+}
+
 class _BottomActionBar extends StatelessWidget {
   const _BottomActionBar();
 
@@ -648,7 +847,7 @@ class _BottomActionBar extends StatelessWidget {
       top: false,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(top: BorderSide(color: Color(0xFFEFF2F4))),
@@ -657,7 +856,7 @@ class _BottomActionBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _BottomActionRow(actions: _actions.take(2).toList()),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             _BottomActionRow(actions: _actions.skip(2).toList()),
           ],
         ),
@@ -680,7 +879,7 @@ class _BottomActionRow extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.only(left: index == 0 ? 0 : 12),
             child: SizedBox(
-              height: 52,
+              height: 46,
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: action.color,
@@ -697,8 +896,8 @@ class _BottomActionRow extends StatelessWidget {
                     action.label,
                     maxLines: 1,
                     style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -838,8 +1037,8 @@ class _TradeBottomSheetState extends State<_TradeBottomSheet> {
                 'Select a Club with Eligibility',
                 style: TextStyle(
                   color: Color(0xFF505963),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 14),
@@ -849,8 +1048,8 @@ class _TradeBottomSheetState extends State<_TradeBottomSheet> {
                 isSell ? 'Sell Amount (Share)' : 'Buy Amount (Share)',
                 style: const TextStyle(
                   color: Color(0xFF505963),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 14),
@@ -950,8 +1149,8 @@ class _TradeBottomSheetState extends State<_TradeBottomSheet> {
                       'Early Mint',
                       style: TextStyle(
                         color: Color(0xFF505963),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -977,8 +1176,8 @@ class _TradeBottomSheetState extends State<_TradeBottomSheet> {
                   child: Text(
                     isSell ? 'Sell Share' : 'Pay USDS & Buy',
                     style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -1018,8 +1217,8 @@ class _TradeTabButton extends StatelessWidget {
           label,
           style: TextStyle(
             color: active ? const Color(0xFFFF6B00) : const Color(0xFF505963),
-            fontSize: 17,
-            fontWeight: active ? FontWeight.w900 : FontWeight.w600,
+            fontSize: 15,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ),
@@ -1046,8 +1245,8 @@ class _TradeSelectField extends StatelessWidget {
               'Select a Club',
               style: TextStyle(
                 color: Color(0xFF9AA0A6),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
@@ -1092,14 +1291,14 @@ class _TradeAmountField extends StatelessWidget {
                 hintText: '0.00',
                 hintStyle: TextStyle(
                   color: Color(0xFF8F969E),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               style: const TextStyle(
                 color: Color(0xFF20242A),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1107,8 +1306,8 @@ class _TradeAmountField extends StatelessWidget {
             suffix,
             style: const TextStyle(
               color: Color(0xFFFF6B00),
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1132,8 +1331,8 @@ class _TradeSummaryRow extends StatelessWidget {
             label,
             style: const TextStyle(
               color: Color(0xFF9AA0A6),
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -1141,8 +1340,8 @@ class _TradeSummaryRow extends StatelessWidget {
           value,
           style: const TextStyle(
             color: Color(0xFF20242A),
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1223,8 +1422,8 @@ class _CheckBottomSheetState extends State<_CheckBottomSheet> {
                 _inputTitle,
                 style: const TextStyle(
                   color: Color(0xFF9AA0A6),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 14),
@@ -1293,8 +1492,8 @@ class _CheckBottomSheetState extends State<_CheckBottomSheet> {
                   child: Text(
                     'Confirm $_activeLabel',
                     style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -1327,8 +1526,8 @@ class _CheckTabButton extends StatelessWidget {
         label,
         style: TextStyle(
           color: active ? const Color(0xFF20242A) : const Color(0xFF9AA0A6),
-          fontSize: 18,
-          fontWeight: active ? FontWeight.w900 : FontWeight.w600,
+          fontSize: 16,
+          fontWeight: active ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
     );
@@ -1370,14 +1569,14 @@ class _CheckAmountField extends StatelessWidget {
                 hintText: '0.00',
                 hintStyle: TextStyle(
                   color: Color(0xFF9AA0A6),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               style: const TextStyle(
                 color: Color(0xFF20242A),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -1387,8 +1586,8 @@ class _CheckAmountField extends StatelessWidget {
               'MAX',
               style: TextStyle(
                 color: Color(0xFFFF8F4D),
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

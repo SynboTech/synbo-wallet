@@ -138,7 +138,7 @@ class _AccountHeader extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                   letterSpacing: 0,
                                 ),
                           ),
@@ -154,7 +154,7 @@ class _AccountHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w400,
                         letterSpacing: 0,
                       ),
                     ),
@@ -208,7 +208,7 @@ class _AccountHeader extends StatelessWidget {
               'Switch Account',
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             for (final account in state.currentWallet.accounts)
@@ -244,7 +244,7 @@ class _AccountHeader extends StatelessWidget {
               'Switch Network',
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             for (final network in state.networks)
@@ -284,7 +284,7 @@ class _AccountHeader extends StatelessWidget {
               'Wallet Menu',
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
             ListTile(
@@ -420,7 +420,7 @@ class _AssetOverview extends StatelessWidget {
                 assetError!,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: colorScheme.error,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             )
@@ -432,7 +432,7 @@ class _AssetOverview extends StatelessWidget {
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 color: colorScheme.onSurface,
                 fontSize: 48,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
                 height: 0.98,
                 letterSpacing: 0,
               ),
@@ -449,7 +449,7 @@ class _AssetOverview extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -620,7 +620,7 @@ class _QuickActionButton extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
